@@ -3,11 +3,19 @@ export interface User {
   email: string;
 }
 
+export interface Habit {
+  id: string;
+  name: string;
+  type: 'standard' | 'custom';
+  userId: string | null;
+  createdAt: string;
+}
+
 export interface Urge {
   id: string;
   userId: string;
-  outcome: 'resisted' | 'gave_in';
-  urgeType: string; // required
+  habitId: string; // required - reference to habit
+  outcome: 'resisted' | 'gave_in' | 'delayed';
   trigger?: string;
   notes?: string;
   createdAt: string;
@@ -16,13 +24,16 @@ export interface Urge {
 export interface UrgeStats {
   totalResisted: number;
   totalGaveIn: number;
+  totalDelayed: number;
   totalUrges: number;
 }
 
 export interface UrgeStatsByType {
-  urgeType: string;
+  habitId: string;
+  habitName: string;
   totalResisted: number;
   totalGaveIn: number;
+  totalDelayed: number;
   totalUrges: number;
 }
 
@@ -48,12 +59,17 @@ export interface LoginRequest {
 }
 
 export interface CreateUrgeRequest {
-  outcome: 'resisted' | 'gave_in';
-  urgeType: string; // required
+  outcome: 'resisted' | 'gave_in' | 'delayed';
+  habitId: string; // required - reference to habit
   trigger?: string;
   notes?: string;
   // optional client-provided timestamp; backend may auto-fill
   timestamp?: string | Date;
+}
+
+export interface CreateHabitRequest {
+  name: string;
+  type: 'standard' | 'custom';
 }
 
 export interface ApiError {

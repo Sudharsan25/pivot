@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { AlertCircle, CheckCircle2, LogsIcon, Zap } from 'lucide-react';
 import {
   Accordion,
@@ -12,8 +12,8 @@ import {
 // --- Data Structure ---
 const PAGES_DATA = [
   {
-    title: 'The Psychological Mechanics of RSD',
-    subtitle: 'Rejection Sensitive Dysphoria',
+    title: 'Rejection Sensitive Dysphoria (RSD)',
+    subtitle: '',
     intro: (
       <>
         <p className="text-slate-700 mb-4">
@@ -72,8 +72,8 @@ const PAGES_DATA = [
     ],
   },
   {
-    title: 'The Psychological Mechanics of Time Blindness',
-    subtitle: "The 'Now' vs 'Not Now' Horizon",
+    title: 'Time Blindness',
+    subtitle: '',
     intro: (
       <>
         <p className="text-slate-700 mb-4">
@@ -132,8 +132,8 @@ const PAGES_DATA = [
     ],
   },
   {
-    title: 'The Psychological Mechanics of the Dopamine Deficit',
-    subtitle: 'The Need for Stimulation',
+    title: 'Dopamine Deficit',
+    subtitle: '',
     intro: (
       <>
         <p className="text-slate-700 mb-3">
@@ -152,9 +152,12 @@ const PAGES_DATA = [
           <strong className="font-semibold text-slate-800">
             The "Wall of Awful"
           </strong>
-          : Using a cumulative "Power Level" rather than fragile streaks
-          provides permanent progress. The single-button interface reduces
-          decision fatigue and lowers the barrier to action.
+          : The "Wall of Awful" is an emotional barrier that builds with each
+          failure, missed deadline, or moment of shame. When someone with ADHD
+          looks at their habit tracker, they're not just seeing tasks—they're
+          seeing this wall of accumulated guilt and fear. The emotional
+          intensity triggers a fight-or-flight response, causing them to freeze
+          or avoid the app entirely.
         </p>
       </>
     ),
@@ -220,15 +223,44 @@ export default function InfoPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 ">
       <div className="w-full max-w-3xl bg-white rounded-xl shadow-lg p-6 sm:p-8">
+        {/* Medical Disclaimer */}
+        <div className="mb-8 bg-amber-50 border border-amber-200 rounded-lg p-4 flex gap-3">
+          <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div className="text-xs text-amber-900">
+            <h4 className="font-semibold text-amber-900 text-sm mb-2">
+              Disclaimer
+            </h4>
+            <p className="text-xs text-amber-800 leading-relaxed">
+              This app is designed as a self-help and reflection tool to support
+              awareness and personal growth. It is{' '}
+              <strong>
+                not a substitute for professional medical or psychological
+                advice, diagnosis, or treatment.
+              </strong>
+              <br />
+              <br />
+              The information shared in this app, including explanations of
+              concepts such as ADHD, RSD, time blindness, and dopamine
+              regulation, is intended for general educational and
+              self-reflection purposes only. It is not medical advice and should
+              not be interpreted as diagnosis or treatment. The content is based
+              on insights aggregated from publicly available research, and
+              articles, and does not replace guidance from qualified medical or
+              mental health professionals.
+              <br />
+              <br />
+              If any of these topics resonate deeply or feel distressing,
+              seeking professional support is always encouraged.
+            </p>
+          </div>
+        </div>
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold text-slate-800">
-              Why this works
+              Understanding the design choices behind{' '}
+              <strong className="text-celadon-600 tracking-wide">PIVOT</strong>
             </h2>
-            <p className="text-sm text-slate-600">
-              Understanding the design choices behind the Urge Tracker
-            </p>
           </div>
           <div className="text-sm font-medium text-slate-400 bg-slate-100 px-3 py-1 rounded-full">
             {index + 1} / {PAGES_DATA.length}
@@ -255,7 +287,7 @@ export default function InfoPage() {
           <div className="bg-slate-50 rounded-xl p-4 sm:p-6 border border-slate-100">
             <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
               <Zap className="w-4 h-4 text-slate-800 fill-slate-800" />
-              How Urge Tracker Addresses This
+              How PIVOT Addresses This
             </h3>
 
             <Accordion type="single" collapsible className="w-full space-y-3">
@@ -335,28 +367,6 @@ export default function InfoPage() {
             >
               Next
             </Button>
-          </div>
-          <Link
-            to="/dashboard"
-            className="text-sm font-medium text-slate-500 hover:text-slate-800 hover:underline transition-colors"
-          >
-            Back to dashboard
-          </Link>
-        </div>
-
-        {/* Medical Disclaimer */}
-        <div className="mt-8 bg-amber-50 border border-amber-200 rounded-lg p-4 flex gap-3">
-          <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-          <div className="text-xs text-amber-900">
-            <p className="font-semibold mb-1">Medical Disclaimer</p>
-            This app is designed as a self-help tool and is{' '}
-            <strong>
-              not a substitute for professional medical or psychological advice
-            </strong>
-            . The information provided is for educational purposes only. If you
-            are experiencing symptoms of ADHD or mental health challenges,
-            please consult with a qualified healthcare provider. We are not
-            medical professionals.
           </div>
         </div>
       </div>

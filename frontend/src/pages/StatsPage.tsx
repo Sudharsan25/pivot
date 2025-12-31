@@ -6,14 +6,16 @@ import { fetchStats } from '@/store/urgesSlice';
 import { urgesAPI } from '@/lib/api';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
+import { AlertCircle, RefreshCw } from 'lucide-react';
 import * as Tabs from '@radix-ui/react-tabs';
 import * as Tooltip from '@radix-ui/react-tooltip';
 
 interface UrgeTypeStat {
-  urgeType: string;
+  habitId: string;
+  habitName: string;
   totalResisted: number;
   totalGaveIn: number;
+  totalDelayed: number;
   totalUrges: number;
 }
 
@@ -301,9 +303,14 @@ export default function StatsPage() {
     setIsLoading(true);
     try {
       const data = await urgesAPI.getStatsByType();
-      setStatsByType(data);
+      // Ensure totalDelayed is present (for backward compatibility)
+      const normalizedData = data.map((stat) => ({
+        ...stat,
+        totalDelayed: stat.totalDelayed || 0,
+      }));
+      setStatsByType(normalizedData);
     } catch (e) {
-      console.error('Failed to load stats by type:', e);
+      console.error('Failed to load stats by habit:', e);
     } finally {
       setIsLoading(false);
     }
@@ -313,7 +320,7 @@ export default function StatsPage() {
     setIsLoading(true);
     try {
       await Promise.all([dispatch(fetchStats()).unwrap(), loadStatsByType()]);
-      setLastUpdated(new Date());
+      //setLastUpdated(new Date());
     } catch (e) {
       console.error('Failed to refresh:', e);
     } finally {
@@ -342,7 +349,7 @@ export default function StatsPage() {
   };
 
   const total = stats?.totalUrges ?? 0;
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  //const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   return (
     <motion.div
@@ -383,7 +390,7 @@ export default function StatsPage() {
             value="urge-stats"
             className="px-3 py-1 rounded-md bg-slate-100"
           >
-            Urge stats
+            Stats
           </Tabs.Trigger>
           <Tooltip.Provider>
             <Tooltip.Root>
@@ -393,7 +400,7 @@ export default function StatsPage() {
                   disabled
                   className="px-3 py-1 rounded-md bg-slate-100 opacity-50 cursor-not-allowed"
                 >
-                  Urge-Time analysis
+                  Time Analysis
                 </Tabs.Trigger>
               </Tooltip.Trigger>
               <Tooltip.Content className="bg-slate-800 text-white text-sm rounded px-2 py-1">
@@ -416,12 +423,26 @@ export default function StatsPage() {
                   Why this works?
                 </Link>
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="flex flex-col items-center justify-center p-4 bg-celadon-50 rounded-lg">
                   <p className="text-sm text-celadon-700 mb-2">Resisted</p>
                   <AnimatedCounter
                     value={stats.totalResisted}
                     className="text-4xl font-bold text-celadon-600"
+                  />
+                </div>
+                <div className="flex flex-col items-center justify-center p-4 bg-amber-50 rounded-lg">
+                  <p className="text-sm text-amber-700 mb-2">Delayed</p>
+                  <AnimatedCounter
+                    value={stats.totalDelayed || 0}
+                    className="text-4xl font-bold text-amber-600"
+                  />
+                </div>
+                <div className="flex flex-col items-center justify-center p-4 bg-muted-teal-50 rounded-lg">
+                  <p className="text-sm text-muted-teal-700 mb-2">Gave In</p>
+                  <AnimatedCounter
+                    value={stats.totalGaveIn}
+                    className="text-4xl font-bold text-muted-teal-500"
                   />
                 </div>
                 <div className="flex flex-col items-center justify-center p-4 bg-lime-cream-50 rounded-lg">
@@ -431,12 +452,19 @@ export default function StatsPage() {
                     className="text-4xl font-bold text-lime-cream-700"
                   />
                 </div>
-                <div className="flex flex-col items-center justify-center p-4 bg-muted-teal-50 rounded-lg">
-                  <p className="text-sm text-muted-teal-700 mb-2">Gave In</p>
-                  <AnimatedCounter
-                    value={stats.totalGaveIn}
-                    className="text-4xl font-bold text-muted-teal-500"
-                  />
+              </div>
+              {/* Medical Disclaimer */}
+              <div className="mt-8 bg-amber-50 border border-amber-200 rounded-lg p-4 flex gap-3">
+                <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div className="text-xs text-amber-900">
+                  <h4 className="font-semibold text-amber-900 text-sm mb-2">
+                    Disclaimer: About this data
+                  </h4>
+                  <p className="text-xs text-amber-800 leading-relaxed">
+                    These stats reflect your logged progress over time. They are
+                    meant for self-reflection and do not represent mental health
+                    or clinical information.
+                  </p>
                 </div>
               </div>
             </motion.div>
@@ -458,27 +486,33 @@ export default function StatsPage() {
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+              <div className="space-y-4">
               <h3 className="text-lg font-semibold text-slate-800">
-                Breakdown by Urge Type
+                Breakdown by Habit
               </h3>
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                 {statsByType.map((stat, idx) => (
                   <motion.div
-                    key={stat.urgeType}
+                    key={stat.habitId}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: idx * 0.05 }}
                     className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow"
                   >
                     <h4 className="font-semibold text-slate-800 mb-4">
-                      {stat.urgeType}
+                      {stat.habitName}
                     </h4>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-slate-600">Resisted</span>
                         <span className="text-lg font-bold text-celadon-600">
                           {stat.totalResisted}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-slate-600">Delayed</span>
+                        <span className="text-lg font-bold text-amber-600">
+                          {stat.totalDelayed || 0}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
@@ -600,10 +634,10 @@ export default function StatsPage() {
       </Tabs.Root>
 
       <div className="pt-6 border-t border-muted-teal-200">
-        <p className="text-sm text-slate-600">
+        {/* <p className="text-sm text-slate-600">
           Last updated:{' '}
           {lastUpdated ? new Date(lastUpdated).toLocaleString() : 'never'}
-        </p>
+        </p> */}
       </div>
     </motion.div>
   );

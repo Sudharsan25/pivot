@@ -9,8 +9,8 @@ import type {
 
 // Parameters accepted when logging an urge from UI
 export interface LogUrgeParams {
-  outcome: 'resisted' | 'gave_in';
-  urgeType: string; // required
+  outcome: 'resisted' | 'gave_in' | 'delayed';
+  habitId: string; // required - reference to habit
   trigger?: string;
   notes?: string;
   // optional client-provided timestamp (string or Date). Backend may auto-fill.
@@ -52,7 +52,7 @@ export const logUrge = createAsyncThunk<
     // create API payload matching CreateUrgeRequest
     const payload: CreateUrgeRequest = {
       outcome: params.outcome,
-      urgeType: params.urgeType,
+      habitId: params.habitId,
       trigger: params.trigger,
       notes: params.notes,
       timestamp: params.timestamp,
@@ -127,8 +127,8 @@ const urgesSlice = createSlice({
         const tempUrge: Urge = {
           id: tempId,
           userId: 'local',
+          habitId: args.habitId,
           outcome: args.outcome,
-          urgeType: args.urgeType,
           trigger: args.trigger,
           notes: args.notes,
           createdAt: new Date().toISOString(),
@@ -142,7 +142,8 @@ const urgesSlice = createSlice({
         if (state.stats) {
           state.stats.totalUrges += 1;
           if (args.outcome === 'resisted') state.stats.totalResisted += 1;
-          else state.stats.totalGaveIn += 1;
+          else if (args.outcome === 'gave_in') state.stats.totalGaveIn += 1;
+          else if (args.outcome === 'delayed') state.stats.totalDelayed += 1;
         }
 
         state.optimisticMap[reqId] = tempId;
@@ -208,10 +209,15 @@ const urgesSlice = createSlice({
                 0,
                 state.stats.totalResisted - 1
               );
-            else
+            else if (removed.outcome === 'gave_in')
               state.stats.totalGaveIn = Math.max(
                 0,
                 state.stats.totalGaveIn - 1
+              );
+            else if (removed.outcome === 'delayed')
+              state.stats.totalDelayed = Math.max(
+                0,
+                state.stats.totalDelayed - 1
               );
           }
 

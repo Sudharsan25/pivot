@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAppDispatch } from '@/store/hooks';
 import { logUrge } from '@/store/urgesSlice';
+import { habitsAPI } from '@/lib/api';
+import type { Habit } from '@/types/api';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -12,19 +14,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { ChevronDown } from 'lucide-react';
 
-const TIMER_DURATION = 5 * 60; // 5 minutes in seconds
-
-const URGE_TYPES = [
-  'Food',
-  'Shopping',
-  'Social Media',
-  'Procrastination',
-  'Gaming',
-  'Sleep',
-  'Other',
-];
+const TIMER_DURATION = 3 * 60; // 5 minutes in seconds
 
 function PanicButton() {
   const dispatch = useAppDispatch();
@@ -34,9 +28,26 @@ function PanicButton() {
   const [isPaused, setIsPaused] = useState(false);
   const [timerComplete, setTimerComplete] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [selectedUrgeType, setSelectedUrgeType] = useState<string>('');
-  const [showTypeDropdown, setShowTypeDropdown] = useState(false);
+  const [habits, setHabits] = useState<Habit[]>([]);
+  const [selectedHabitId, setSelectedHabitId] = useState<string>('');
+  const [isCustom, setIsCustom] = useState(false);
+  const [customHabitName, setCustomHabitName] = useState<string>('');
+  const [showHabitDropdown, setShowHabitDropdown] = useState(false);
+  const [timerStartTime, setTimerStartTime] = useState<number | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Fetch habits on mount
+  useEffect(() => {
+    const loadHabits = async () => {
+      try {
+        const userHabits = await habitsAPI.getHabits();
+        setHabits(userHabits);
+      } catch (error) {
+        console.error('Failed to load habits:', error);
+      }
+    };
+    loadHabits();
+  }, []);
 
   // Timer logic
   useEffect(() => {
@@ -66,12 +77,12 @@ function PanicButton() {
 
   // Handle timer completion
   useEffect(() => {
-    if (timerComplete) {
-      // Log as resisted with urgeType
+    if (timerComplete && selectedHabitId) {
+      // Log as resisted with habitId
       dispatch(
         logUrge({
           outcome: 'resisted',
-          urgeType: selectedUrgeType,
+          habitId: selectedHabitId,
           notes: 'Resisted after 5-minute timer',
         })
       );
@@ -83,7 +94,7 @@ function PanicButton() {
 
       return () => clearTimeout(timer);
     }
-  }, [timerComplete, dispatch, selectedUrgeType]);
+  }, [timerComplete, dispatch, selectedHabitId]);
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -91,13 +102,32 @@ function PanicButton() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleStartTimer = () => {
-    if (!selectedUrgeType) {
-      // Can't show toast here, but we'll disable button if type not selected
+  const handleStartTimer = async () => {
+    if (!selectedHabitId && !isCustom) {
+      return;
+    }
+    // If custom, create the habit first
+    if (isCustom && customHabitName.trim()) {
+      try {
+        const newHabit = await habitsAPI.createHabit({
+          name: customHabitName.trim(),
+          type: 'custom',
+        });
+        setSelectedHabitId(newHabit.id);
+        setHabits([...habits, newHabit]);
+        setIsCustom(false);
+        setCustomHabitName('');
+      } catch (error) {
+        console.error('Failed to create habit:', error);
+        return;
+      }
+    }
+    if (!selectedHabitId) {
       return;
     }
     setTimerStarted(true);
     setIsPaused(false);
+    setTimerStartTime(Date.now());
   };
 
   const handlePauseResume = () => {
@@ -119,31 +149,86 @@ function PanicButton() {
     setIsPaused(false);
     setTimerComplete(false);
     setShowConfirmation(false);
-    setSelectedUrgeType('');
-    setShowTypeDropdown(false);
+    setSelectedHabitId('');
+    setIsCustom(false);
+    setCustomHabitName('');
+    setShowHabitDropdown(false);
+    setTimerStartTime(null);
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
   };
 
-  const handleResisted = () => {
+  const getOutcomeBasedOnTimer = (): 'resisted' | 'gave_in' | 'delayed' => {
+    if (timerStartTime) {
+      const elapsedSeconds = (Date.now() - timerStartTime) / 1000;
+      // If timer ran for more than 10 seconds, auto-set to delayed
+      if (elapsedSeconds >= 10) {
+        return 'delayed';
+      }
+    }
+    // Default behavior: user chooses manually
+    return 'resisted';
+  };
+
+  const handleResisted = async () => {
+    let finalHabitId = selectedHabitId;
+    // If custom, create the habit first
+    if (isCustom && customHabitName.trim()) {
+      try {
+        const newHabit = await habitsAPI.createHabit({
+          name: customHabitName.trim(),
+          type: 'custom',
+        });
+        finalHabitId = newHabit.id;
+        setHabits([...habits, newHabit]);
+      } catch (error) {
+        console.error('Failed to create habit:', error);
+        return;
+      }
+    }
+    if (!finalHabitId) return;
+    const outcome = getOutcomeBasedOnTimer();
     dispatch(
       logUrge({
-        outcome: 'resisted',
-        urgeType: selectedUrgeType,
-        notes: 'Resisted (closed timer early)',
+        outcome,
+        habitId: finalHabitId,
+        notes:
+          outcome === 'delayed'
+            ? 'Delayed (timer ran > 10 seconds)'
+            : 'Resisted (closed timer early)',
       })
     );
     resetModal();
   };
 
-  const handleGaveIn = () => {
+  const handleGaveIn = async () => {
+    let finalHabitId = selectedHabitId;
+    // If custom, create the habit first
+    if (isCustom && customHabitName.trim()) {
+      try {
+        const newHabit = await habitsAPI.createHabit({
+          name: customHabitName.trim(),
+          type: 'custom',
+        });
+        finalHabitId = newHabit.id;
+        setHabits([...habits, newHabit]);
+      } catch (error) {
+        console.error('Failed to create habit:', error);
+        return;
+      }
+    }
+    if (!finalHabitId) return;
+    const outcome = getOutcomeBasedOnTimer();
     dispatch(
       logUrge({
-        outcome: 'gave_in',
-        urgeType: selectedUrgeType,
-        notes: 'Gave in (closed timer early)',
+        outcome,
+        habitId: finalHabitId,
+        notes:
+          outcome === 'delayed'
+            ? 'Delayed (timer ran > 10 seconds)'
+            : 'Gave in (closed timer early)',
       })
     );
     resetModal();
@@ -207,7 +292,7 @@ function PanicButton() {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
-        I'M HAVING AN URGE!
+        PANIC BUTTON
       </motion.button>
 
       {/* Main Timer Dialog */}
@@ -222,7 +307,7 @@ function PanicButton() {
                 ? 'You resisted the urge!'
                 : timerStarted
                   ? 'Focus on something else. You can do this!'
-                  : 'Start the timer and wait 5 minutes. You can do this!'}
+                  : 'Start the timer and wait 3 minutes. You can do this!'}
             </DialogDescription>
           </DialogHeader>
 
@@ -277,45 +362,72 @@ function PanicButton() {
               </div>
             ) : (
               <div className="text-center space-y-6">
-                {/* Urge Type Dropdown */}
+                {/* Habit Dropdown */}
                 <div className="relative">
                   <button
-                    onClick={() => setShowTypeDropdown(!showTypeDropdown)}
+                    onClick={() => setShowHabitDropdown(!showHabitDropdown)}
                     className={`w-full px-4 py-3 rounded-lg font-semibold text-sm flex items-center justify-between border transition-colors ${
-                      selectedUrgeType
+                      selectedHabitId || isCustom
                         ? 'bg-celadon-100 text-celadon-900 border-celadon-300'
                         : 'bg-red-50 text-red-700 border-red-300 hover:bg-red-100'
                     }`}
                   >
                     <span>
-                      {selectedUrgeType || '⚠️ Select urge type (required)'}
+                      {isCustom
+                        ? 'Custom'
+                        : habits.find((h) => h.id === selectedHabitId)?.name ||
+                          'Select habit (required)'}
                     </span>
                     <ChevronDown
                       className={`h-4 w-4 transition-transform ${
-                        showTypeDropdown ? 'rotate-180' : ''
+                        showHabitDropdown ? 'rotate-180' : ''
                       }`}
                     />
                   </button>
 
-                  {showTypeDropdown && (
-                    <div className="absolute top-full mt-1 w-full bg-white border border-slate-300 rounded-lg shadow-lg z-50">
-                      {URGE_TYPES.map((type) => (
+                  {showHabitDropdown && (
+                    <div className="absolute top-full mt-1 w-full bg-white border border-slate-300 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                      {/* All habits with labels */}
+                      {habits.map((habit) => (
                         <button
-                          key={type}
+                          key={habit.id}
                           onClick={() => {
-                            setSelectedUrgeType(type);
-                            setShowTypeDropdown(false);
+                            setSelectedHabitId(habit.id);
+                            setIsCustom(false);
+                            setCustomHabitName('');
+                            setShowHabitDropdown(false);
                           }}
-                          className="w-full text-left px-4 py-2 hover:bg-slate-100 text-sm text-slate-700 border-b last:border-b-0"
+                          className="w-full text-left px-4 py-2 hover:bg-slate-100 text-sm text-slate-700 border-b flex items-center justify-between"
                         >
-                          {type}
+                          <span>{habit.name}</span>
+                          <span
+                            className={`text-xs font-medium ml-2 px-2 py-0.5 rounded text-white ${
+                              habit.type === 'standard'
+                                ? 'bg-celadon-700'
+                                : 'bg-muted-teal-400'
+                            }`}
+                          >
+                            {habit.type === 'standard' ? 'Standard' : 'Custom'}
+                          </span>
                         </button>
                       ))}
-                      {selectedUrgeType && (
+                      <button
+                        onClick={() => {
+                          setIsCustom(true);
+                          setSelectedHabitId('');
+                          setShowHabitDropdown(false);
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-slate-100 text-sm text-slate-700 border-t-2 border-slate-300 font-semibold"
+                      >
+                        + Create Custom Habit
+                      </button>
+                      {(selectedHabitId || isCustom) && (
                         <button
                           onClick={() => {
-                            setSelectedUrgeType('');
-                            setShowTypeDropdown(false);
+                            setSelectedHabitId('');
+                            setIsCustom(false);
+                            setCustomHabitName('');
+                            setShowHabitDropdown(false);
                           }}
                           className="w-full text-left px-4 py-2 hover:bg-slate-100 text-sm text-slate-500"
                         >
@@ -326,9 +438,25 @@ function PanicButton() {
                   )}
                 </div>
 
+                {/* Custom Habit Name Input */}
+                {isCustom && (
+                  <div>
+                    <Label className="text-sm font-medium text-muted-teal-700 mb-2">
+                      Custom habit name
+                    </Label>
+                    <Input
+                      value={customHabitName}
+                      onChange={(e) => setCustomHabitName(e.target.value)}
+                      placeholder="Enter your custom habit name"
+                      className="w-full rounded-lg border-2 border-muted-teal-200 min-h-[48px] focus:outline-none focus:border-celadon-500 focus:ring-2 focus:ring-celadon-200"
+                    />
+                  </div>
+                )}
+
                 <p className="text-lg text-slate-600">
-                  When you're ready, start the 5-minute timer. Focus on
-                  something else during this time.
+                  When you're ready, start the timer. Focus on something else
+                  during this time. Your favourite song, some quick pushups, a
+                  short walk, etc.
                 </p>
                 <div className="mt-2 text-sm text-blue-600">
                   <Link
@@ -340,7 +468,10 @@ function PanicButton() {
                 </div>
                 <Button
                   onClick={handleStartTimer}
-                  disabled={!selectedUrgeType}
+                  disabled={
+                    (!selectedHabitId && !isCustom) ||
+                    (isCustom && !customHabitName.trim())
+                  }
                   className="w-full min-h-12 text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   START TIMER
@@ -352,14 +483,21 @@ function PanicButton() {
       </Dialog>
 
       {/* Confirmation Dialog */}
+
+      {/* The confirmation dialog should show buttons and text based on the timer duration. */}
+
       <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
         <DialogContent className="sm:max-w-md bg-white/95 backdrop-blur-sm rounded-lg shadow-xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-center">
-              Did you resist or give in?
+              {timerStartTime && timerStartTime > Date.now() - 10000
+                ? 'You Delayed the Urge!!'
+                : 'You Resisted the Urge!'}
             </DialogTitle>
             <DialogDescription className="text-center">
-              How did it go during the timer?
+              {timerStartTime && timerStartTime > Date.now() - 10000
+                ? 'You delayed the urge for more than 10 seconds. Good job!'
+                : 'You resisted the urge. Good job!'}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex flex-col sm:flex-row gap-3 sm:gap-0">

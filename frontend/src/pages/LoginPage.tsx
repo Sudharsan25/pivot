@@ -2,12 +2,13 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate, Link } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { login, clearError } from '@/store/authSlice';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Eye, EyeOff } from 'lucide-react';
 
 // Zod validation schema
 const loginSchema = z.object({
@@ -27,6 +28,7 @@ function LoginPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { loading, error, token } = useAppSelector((state) => state.auth);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -38,7 +40,7 @@ function LoginPage() {
 
   useEffect(() => {
     if (token) {
-      navigate('/dashboard', { replace: true });
+      navigate('/dashboard/track', { replace: true });
     }
   }, [token, navigate]);
 
@@ -53,7 +55,7 @@ function LoginPage() {
       await dispatch(
         login({ email: data.email, password: data.password })
       ).unwrap();
-      navigate('/dashboard', { replace: true });
+      navigate('/', { replace: true });
     } catch (err) {
       // Error is handled by Redux state
     }
@@ -77,12 +79,7 @@ function LoginPage() {
           {/* Glassmorphism Quote Card */}
           <div className="absolute top-4 left-8 right-8 p-4 rounded-2xl text-celadon-600">
             <div className="mb-4"></div>
-            <p className="text-2xl font-bold tracking-tight text-center text-celadon-600">
-              PIVOT
-            </p>
-            <p className="text-lg font-semibold text-muted text-center">
-              Progress that doesn't break
-            </p>
+
             <p className="text-slate-900 leading-relaxed">
               It’s not about how many days you go without failing. It’s about
               how many wins you collect despite failures. Progress isn’t
@@ -95,14 +92,18 @@ function LoginPage() {
       {/* Right Column - Login Form */}
       <div className="flex-1 flex items-center justify-center p-8 bg-muted-teal-50">
         <div className="w-full max-w-[420px] space-y-8">
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight text-celadon-600">
-              Welcome back!
-            </h1>
-            <p className="text-slate-900">
-              Please enter your details to sign in.
-            </p>
-          </div>
+          <p className="text-center text-lg font-medium tracking-tight text-gray-600">
+            <strong className="text-2xl font-extrabold tracking-wide text-center text-celadon-600">
+              PIVOT
+            </strong>{' '}
+            <br />
+            Progress that doesn't break
+          </p>
+
+          <p className="text-lg font-semibold text-center text-celadon-600">
+            {' '}
+            Welcome back!
+          </p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 ">
             <div className="space-y-4">
@@ -123,14 +124,28 @@ function LoginPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  className="h-12"
-                  {...register('password')}
-                  disabled={loading}
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Enter your password"
+                    className="h-12 pr-10"
+                    {...register('password')}
+                    disabled={loading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-4 -translate-y-1/2 text-slate-500 hover:text-slate-700 focus:outline-none mb-5"
+                    disabled={loading}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
                 {errors.password && (
                   <p className="text-sm text-red-500">
                     {errors.password.message}

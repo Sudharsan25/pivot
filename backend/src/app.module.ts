@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { DbModule } from './db/db.module';
 import { AuthModule } from './auth/auth.module';
 import { UrgesModule } from './urges/urges.module';
+import { HabitsModule } from './habits/habits.module';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
@@ -22,6 +23,7 @@ import { ConfigModule } from '@nestjs/config';
     ]),
     DbModule,
     AuthModule,
+    HabitsModule,
     UrgesModule,
   ],
   controllers: [AppController],

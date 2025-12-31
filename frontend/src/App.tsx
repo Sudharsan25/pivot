@@ -1,9 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAppSelector } from '@/store/hooks';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import LandingPage from '@/pages/LandingPage';
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
-import HomePage from '@/pages/HomePage';
+import TrackPage from '@/pages/TrackPage';
 import StatsPage from '@/pages/StatsPage';
 import InfoPage from '@/pages/InfoPage';
 import DashboardLayout from '@/layouts/DashboardLayout';
@@ -15,43 +16,51 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public routes */}
+        {/* Login and Register routes - no DashboardLayout */}
         <Route
           path="/login"
-          element={token ? <Navigate to="/dashboard" replace /> : <LoginPage />}
+          element={
+            token ? <Navigate to="/dashboard/track" replace /> : <LoginPage />
+          }
         />
         <Route
           path="/register"
           element={
-            token ? <Navigate to="/dashboard" replace /> : <RegisterPage />
+            token ? (
+              <Navigate to="/dashboard/track" replace />
+            ) : (
+              <RegisterPage />
+            )
           }
         />
 
-        {/* Protected dashboard layout with nested routes */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<HomePage />} />
-          <Route path="stats" element={<StatsPage />} />
-          <Route path="info" element={<InfoPage />} />
+        {/* All other routes with DashboardLayout */}
+        <Route path="/" element={<DashboardLayout />}>
+          {/* Public routes */}
+          <Route index element={<LandingPage />} />
+          <Route path="dashboard/info" element={<InfoPage />} />
+
+          {/* Protected routes */}
+          <Route
+            path="dashboard/track"
+            element={
+              <ProtectedRoute>
+                <TrackPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="dashboard/stats"
+            element={
+              <ProtectedRoute>
+                <StatsPage />
+              </ProtectedRoute>
+            }
+          />
         </Route>
 
-        {/* Default redirect */}
-        <Route
-          path="/"
-          element={<Navigate to={token ? '/dashboard' : '/login'} replace />}
-        />
-
-        {/* Catch all - redirect to dashboard or login */}
-        <Route
-          path="*"
-          element={<Navigate to={token ? '/dashboard' : '/login'} replace />}
-        />
+        {/* Catch-all redirect */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

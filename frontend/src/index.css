@@ -305,6 +305,57 @@
   }
 }
 
+/* ===== Page Transition Animations ===== */
+@layer utilities {
+  /* Page transition base - ADHD-friendly timing (300-400ms) */
+  .page-transition {
+    animation: fadeInUp 0.4s ease-out;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Stagger animation for benefit cards - ADHD-friendly delays */
+  .stagger-item {
+    opacity: 0;
+    animation: fadeInUp 0.4s ease-out forwards;
+  }
+
+  .stagger-item:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+
+  .stagger-item:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .stagger-item:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+
+  /* Smooth transitions for interactive elements */
+  .transition-smooth {
+    transition: all 0.3s ease-out;
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .page-transition,
+    .stagger-item {
+      animation: none;
+      opacity: 1;
+    }
+  }
+}
+
 @layer base {
   * {
     @apply border-border;

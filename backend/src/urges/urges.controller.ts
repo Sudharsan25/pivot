@@ -39,7 +39,7 @@ export class UrgesController {
       const urge = await this.urgesService.logUrge(
         user.id,
         createUrgeDto.outcome,
-        createUrgeDto.urgeType,
+        createUrgeDto.habitId,
         createUrgeDto.trigger,
         createUrgeDto.notes,
       );

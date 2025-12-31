@@ -12,11 +12,27 @@ import type {
   RegisterRequest,
   LoginRequest,
   ApiError,
+  Habit,
+  CreateHabitRequest,
 } from '@/types/api';
+
+// Get API URL from environment variable with fallback
+// Vite requires VITE_ prefix for client-side env vars
+// Use import.meta.env (Vite's way) instead of process.env
+const getApiUrl = (): string => {
+  const envUrl =
+    import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL;
+  // Check if env var exists and is not empty
+  if (envUrl && typeof envUrl === 'string' && envUrl.trim() !== '') {
+    return envUrl.trim();
+  }
+  // Fallback to localhost for development
+  return 'http://localhost:3000';
+};
 
 // Create axios instance with base configuration
 const api: AxiosInstance = axios.create({
-  baseURL: 'http://localhost:3000',
+  baseURL: getApiUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
@@ -143,10 +159,7 @@ export const urgesAPI = {
    */
   async logUrge(payload: CreateUrgeRequest): Promise<Urge> {
     try {
-      const response = await api.post<Urge>(
-        '/urges',
-        payload as CreateUrgeRequest
-      );
+      const response = await api.post<Urge>('/urges', payload);
       return response.data;
     } catch (error) {
       throw new Error(getErrorMessage(error));
@@ -193,6 +206,7 @@ export const urgesAPI = {
       urgeType: string;
       totalResisted: number;
       totalGaveIn: number;
+      totalDelayed: number;
       totalUrges: number;
     }>
   > {
@@ -202,6 +216,7 @@ export const urgesAPI = {
           urgeType: string;
           totalResisted: number;
           totalGaveIn: number;
+          totalDelayed: number;
           totalUrges: number;
         }>
       >('/urges/stats/by-type');
@@ -255,6 +270,33 @@ export const urgesAPI = {
       return response.data;
     } catch (error) {
       console.error('[urgesAPI.getTimeSeries] Error:', error);
+      throw new Error(getErrorMessage(error));
+    }
+  },
+};
+
+// Habits API functions
+export const habitsAPI = {
+  /**
+   * Get all habits available to the current user (standard + custom)
+   */
+  async getHabits(): Promise<Habit[]> {
+    try {
+      const response = await api.get<Habit[]>('/habits');
+      return response.data;
+    } catch (error) {
+      throw new Error(getErrorMessage(error));
+    }
+  },
+
+  /**
+   * Create a new habit
+   */
+  async createHabit(payload: CreateHabitRequest): Promise<Habit> {
+    try {
+      const response = await api.post<Habit>('/habits', payload);
+      return response.data;
+    } catch (error) {
       throw new Error(getErrorMessage(error));
     }
   },

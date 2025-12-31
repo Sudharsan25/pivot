@@ -1,0 +1,1 @@
+ALTER TYPE urge_outcome ADD VALUE 'delayed';

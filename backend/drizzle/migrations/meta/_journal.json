@@ -29,6 +29,20 @@
       "when": 1767154510736,
       "tag": "0003_dusty_human_torch",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1767186555187,
+      "tag": "0004_volatile_forge",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1767188234154,
+      "tag": "0005_late_khan",
+      "breakpoints": true
     }
   ]
 }

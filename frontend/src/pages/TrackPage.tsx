@@ -35,11 +35,26 @@ function QuickLogPopover({ isOpen, onOpenChange }: QuickLogPopoverProps) {
   );
 }
 
-export default function HomePage() {
+export default function TrackPage() {
   const [quickLogOpen, setQuickLogOpen] = useState(false);
 
   return (
-    <div className="space-y-8">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-8"
+    >
+      {/* Page Header */}
+      <div>
+        <h1 className="text-3xl font-bold text-muted-teal-900 mb-8">
+          Track Your Urges
+        </h1>
+        <p className="text-lg text-muted-teal-600 mb-12">
+          Use the panic button for immediate help, or log your progress
+        </p>
+      </div>
+
       {/* Two-column grid: Panic + Quick Log */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Left Column - Panic Button (uses PanicButton component) */}
@@ -48,15 +63,15 @@ export default function HomePage() {
         </div>
 
         {/* Right Column - Quick Log Button */}
-        <div className="flex items-center justify-center w-full">
-          <ZapIcon className="w-8 h-8" />
+        <div className="flex items-center justify-center">
           <motion.button
             onClick={() => setQuickLogOpen(true)}
-            className="w-full h-[160px] md:w-full md:h-[220px] flex flex-col items-center justify-center gap-3 bg-lime-cream-500 hover:bg-lime-cream-600 text-slate-900 font-bold shadow-lg hover:shadow-xl transition-shadow duration-150"
+            className="w-full h-[85px] md:w-[360px] md:h-[85px] flex items-center justify-center gap-3 bg-lime-cream-500 hover:bg-lime-cream-600 text-slate-900 font-bold shadow-lg hover:shadow-xl transition-shadow duration-150"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <span className="text-xs md:text-sm text-center font-bold md:font-extrabold leading-tight">
+            <ZapIcon className="w-8 h-8 text-white " />
+            <span className="text-md md:text-xl text-center font-bold md:font-extrabold text-white leading-tight">
               QUICK LOG
             </span>
           </motion.button>
@@ -67,6 +82,6 @@ export default function HomePage() {
 
       {/* Manual Logging Form */}
       <ManualUrgeForm />
-    </div>
+    </motion.div>
   );
 }

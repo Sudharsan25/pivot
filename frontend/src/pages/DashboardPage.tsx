@@ -8,9 +8,11 @@ import { RefreshCw } from 'lucide-react';
 import PanicButton from '@/components/PanicButton';
 
 interface UrgeTypeStat {
-  urgeType: string;
+  habitId: string;
+  habitName: string;
   totalResisted: number;
   totalGaveIn: number;
+  totalDelayed: number;
   totalUrges: number;
 }
 
@@ -163,25 +165,31 @@ export default function DashboardPage() {
       ) : (
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-slate-800">
-            Breakdown by Urge Type
+            Breakdown by Habit
           </h3>
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {statsByType.map((stat, idx) => (
               <motion.div
-                key={stat.urgeType}
+                key={stat.habitId}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.05 }}
                 className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow"
               >
                 <h4 className="font-semibold text-slate-800 mb-4">
-                  {stat.urgeType}
+                  {stat.habitName}
                 </h4>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-slate-600">Resisted</span>
                     <span className="text-lg font-bold text-celadon-600">
                       {stat.totalResisted}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-slate-600">Delayed</span>
+                    <span className="text-lg font-bold text-amber-600">
+                      {stat.totalDelayed || 0}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">

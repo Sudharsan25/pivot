@@ -2,12 +2,13 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate, Link } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { register, clearError } from '@/store/authSlice';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Eye, EyeOff } from 'lucide-react';
 
 // Zod validation schema with password confirmation
 const registerSchema = z
@@ -33,6 +34,8 @@ function RegisterPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { loading, error, token } = useAppSelector((state) => state.auth);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register: registerField,
@@ -44,7 +47,7 @@ function RegisterPage() {
 
   useEffect(() => {
     if (token) {
-      navigate('/dashboard', { replace: true });
+      navigate('/dashboard/track', { replace: true });
     }
   }, [token, navigate]);
 
@@ -59,7 +62,7 @@ function RegisterPage() {
       await dispatch(
         register({ email: data.email, password: data.password })
       ).unwrap();
-      navigate('/dashboard', { replace: true });
+      navigate('/', { replace: true });
     } catch (err) {
       // Error is handled by Redux state
     }
@@ -68,7 +71,7 @@ function RegisterPage() {
   return (
     <div className="min-h-screen w-full flex bg-white">
       {/* Left Column - Image & Quote (Hidden on Mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-slate-900 p-4">
+      <div className="hidden lg:flex lg:w-1/2 relative bg-muted-teal-50 p-4">
         <div className="relative w-full h-full rounded-3xl overflow-hidden">
           {/* Background Image */}
           <img
@@ -83,12 +86,7 @@ function RegisterPage() {
           {/* Glassmorphism Quote Card */}
           <div className="absolute top-4 left-8 right-8 p-4 rounded-2xl ">
             <div className="mb-4"></div>
-            <p className="text-2xl font-bold tracking-tight text-center">
-              PIVOT
-            </p>
-            <p className="text-lg font-semibold text-muted text-center">
-              Progress that doesn't break
-            </p>
+
             <p className="text-slate-700 leading-relaxed">
               It’s not about how many days you go without failing. It’s about
               how many wins you collect despite failures. Progress isn’t
@@ -99,14 +97,19 @@ function RegisterPage() {
       </div>
 
       {/* Right Column - Register Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-white">
+      <div className="flex-1 flex items-center justify-center p-8 bg-muted-teal-50">
         <div className="w-full max-w-[420px] space-y-8">
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-              Create an account
-            </h1>
-            <p className="text-slate-500">Start tracking your progress today</p>
-          </div>
+          <p className="text-center text-lg font-medium tracking-tight text-gray-600">
+            <strong className="text-2xl font-extrabold tracking-wide text-center text-celadon-600">
+              PIVOT
+            </strong>{' '}
+            <br />
+            Progress that doesn't break
+          </p>
+          <p className="text-lg font-semibold text-center text-celadon-600">
+            {' '}
+            Create an account
+          </p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
@@ -126,14 +129,28 @@ function RegisterPage() {
 
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Create a password"
-                className="h-12"
-                {...registerField('password')}
-                disabled={loading}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Create a password"
+                  className="h-12 pr-10"
+                  {...registerField('password')}
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-4 -translate-y-1/2 text-slate-500 hover:text-slate-700 focus:outline-none"
+                  disabled={loading}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
               {errors.password && (
                 <p className="text-sm text-red-500">
                   {errors.password.message}
@@ -143,14 +160,28 @@ function RegisterPage() {
 
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="Confirm your password"
-                className="h-12"
-                {...registerField('confirmPassword')}
-                disabled={loading}
-              />
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder="Confirm your password"
+                  className="h-12 pr-10"
+                  {...registerField('confirmPassword')}
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-4 -translate-y-1/2 text-slate-500 hover:text-slate-700 focus:outline-none"
+                  disabled={loading}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
               {errors.confirmPassword && (
                 <p className="text-sm text-red-500">
                   {errors.confirmPassword.message}
@@ -166,13 +197,12 @@ function RegisterPage() {
 
             <Button
               type="submit"
-              className="w-full h-12 bg-black hover:bg-slate-800 text-white font-semibold text-base rounded-lg mt-2"
+              className="w-full h-12 bg-celadon-600 hover:bg-slate-800 text-white font-semibold text-base rounded-lg mt-2"
               disabled={loading}
             >
               {loading ? 'Creating account...' : 'Create account'}
             </Button>
           </form>
-
           {/* <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t border-slate-200" />
@@ -200,12 +230,11 @@ function RegisterPage() {
               Continue with Twitter
             </Button>
           </div> */}
-
-          <p className="text-center text-sm text-slate-600">
+          <p className="text-center text-sm text-slate-900">
             Already have an account?{' '}
             <Link
               to="/login"
-              className="font-semibold text-slate-900 hover:underline"
+              className="font-semibold text-celadon-600 hover:underline"
             >
               Sign in
             </Link>

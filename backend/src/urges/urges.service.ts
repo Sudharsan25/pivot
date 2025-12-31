@@ -1,12 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { eq, desc, count } from 'drizzle-orm';
 import { DbService } from '../db/db.service';
-import { urges, Urge } from '../db/schema';
+import { urges, Urge, habits } from '../db/schema';
 import { UrgeOutcome } from './dto/create-urge.dto';
 
 export interface UrgeStats {
   totalResisted: number;
   totalGaveIn: number;
+  totalDelayed: number;
   totalUrges: number;
 }
 
@@ -29,7 +30,7 @@ export class UrgesService {
   async logUrge(
     userId: string,
     outcome: UrgeOutcome,
-    urgeType: string,
+    habitId: string,
     trigger?: string,
     notes?: string,
   ): Promise<Urge> {
@@ -38,8 +39,8 @@ export class UrgesService {
         .insert(urges)
         .values({
           userId,
+          habitId,
           outcome,
-          urgeType: urgeType,
           trigger: trigger || null,
           notes: notes || null,
         })
@@ -111,20 +112,24 @@ export class UrgesService {
 
       let totalResisted = 0;
       let totalGaveIn = 0;
+      let totalDelayed = 0;
 
       for (const stat of stats) {
         if (stat.outcome === 'resisted') {
           totalResisted = Number(stat.count);
         } else if (stat.outcome === 'gave_in') {
           totalGaveIn = Number(stat.count);
+        } else if (stat.outcome === 'delayed') {
+          totalDelayed = Number(stat.count);
         }
       }
 
-      const totalUrges = totalResisted + totalGaveIn;
+      const totalUrges = totalResisted + totalGaveIn + totalDelayed;
 
       return {
         totalResisted,
         totalGaveIn,
+        totalDelayed,
         totalUrges,
       };
     } catch (error) {
@@ -134,52 +139,71 @@ export class UrgesService {
   }
 
   /**
-   * Get urge statistics by urge type for a user
+   * Get urge statistics by habit for a user
    */
   async getUrgeStatsByType(userId: string): Promise<
     Array<{
-      urgeType: string;
+      habitId: string;
+      habitName: string;
       totalResisted: number;
       totalGaveIn: number;
+      totalDelayed: number;
       totalUrges: number;
     }>
   > {
     try {
       const stats = await this.dbService.db
         .select({
-          urgeType: urges.urgeType,
+          habitId: urges.habitId,
+          habitName: habits.name,
           outcome: urges.outcome,
           count: count(),
         })
         .from(urges)
+        .innerJoin(habits, eq(urges.habitId, habits.id))
         .where(eq(urges.userId, userId))
-        .groupBy(urges.urgeType, urges.outcome);
+        .groupBy(urges.habitId, habits.name, urges.outcome);
 
-      // Aggregate by urge type
-      const byType = new Map<
+      // Aggregate by habit
+      const byHabit = new Map<
         string,
-        { totalResisted: number; totalGaveIn: number }
+        {
+          habitName: string;
+          totalResisted: number;
+          totalGaveIn: number;
+          totalDelayed: number;
+        }
       >();
 
       for (const stat of stats) {
-        const type = stat.urgeType;
-        if (!byType.has(type)) {
-          byType.set(type, { totalResisted: 0, totalGaveIn: 0 });
+        const habitId = stat.habitId;
+        if (!byHabit.has(habitId)) {
+          byHabit.set(habitId, {
+            habitName: stat.habitName,
+            totalResisted: 0,
+            totalGaveIn: 0,
+            totalDelayed: 0,
+          });
         }
-        const counts = byType.get(type)!;
+        const counts = byHabit.get(habitId)!;
         if (stat.outcome === 'resisted') {
           counts.totalResisted += Number(stat.count);
         } else if (stat.outcome === 'gave_in') {
           counts.totalGaveIn += Number(stat.count);
+        } else if (stat.outcome === 'delayed') {
+          counts.totalDelayed += Number(stat.count);
         }
       }
 
       // Format response
-      const result = Array.from(byType.entries()).map(([urgeType, counts]) => ({
-        urgeType,
+      const result = Array.from(byHabit.entries()).map(([habitId, counts]) => ({
+        habitId,
+        habitName: counts.habitName,
         totalResisted: counts.totalResisted,
         totalGaveIn: counts.totalGaveIn,
-        totalUrges: counts.totalResisted + counts.totalGaveIn,
+        totalDelayed: counts.totalDelayed,
+        totalUrges:
+          counts.totalResisted + counts.totalGaveIn + counts.totalDelayed,
       }));
 
       // Sort by total urges descending
@@ -187,8 +211,8 @@ export class UrgesService {
 
       return result;
     } catch (error) {
-      this.logger.error('Failed to get urge stats by type', error);
-      throw new Error('Failed to retrieve urge statistics by type');
+      this.logger.error('Failed to get urge stats by habit', error);
+      throw new Error('Failed to retrieve urge statistics by habit');
     }
   }
 
@@ -214,24 +238,26 @@ export class UrgesService {
 
       if (date) {
         // If date is provided, always use hourly bucket for that specific date
-        sql = `SELECT date_trunc('hour', created_at) as bucket, urge_type, count(*)::text as count
-               FROM urges
-               WHERE user_id = $1 AND DATE(created_at) = $2
-               GROUP BY bucket, urge_type
+        sql = `SELECT date_trunc('hour', u.created_at) as bucket, h.name as habit_name, count(*)::text as count
+               FROM urges u
+               INNER JOIN habits h ON u.habit_id = h.id
+               WHERE u.user_id = $1 AND DATE(u.created_at) = $2
+               GROUP BY bucket, h.name
                ORDER BY bucket ASC`;
         params = [userId, date];
       } else {
         // Otherwise, use bucket and days
         const bucketStr = bucket === 'hour' ? 'hour' : 'day';
-        sql = `SELECT date_trunc('${bucketStr}', created_at) as bucket, urge_type, count(*)::text as count
-               FROM urges
-               WHERE user_id = $1 AND created_at >= now() - interval '${days} days'
-               GROUP BY bucket, urge_type
+        sql = `SELECT date_trunc('${bucketStr}', u.created_at) as bucket, h.name as habit_name, count(*)::text as count
+               FROM urges u
+               INNER JOIN habits h ON u.habit_id = h.id
+               WHERE u.user_id = $1 AND u.created_at >= now() - interval '${days} days'
+               GROUP BY bucket, h.name
                ORDER BY bucket ASC`;
         params = [userId];
       }
 
-      const rows: Array<{ bucket: Date; urge_type: string; count: string }> =
+      const rows: Array<{ bucket: Date; habit_name: string; count: string }> =
         await this.dbService.client.unsafe(sql, params);
 
       this.logger.log(
@@ -242,7 +268,7 @@ export class UrgesService {
       // Normalize response
       const result = rows.map((r) => ({
         bucket: new Date(r.bucket).toISOString(),
-        urgeType: r.urge_type,
+        urgeType: r.habit_name, // Keep same field name for frontend compatibility
         count: Number(r.count),
       }));
 
