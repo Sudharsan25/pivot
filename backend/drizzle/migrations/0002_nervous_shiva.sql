@@ -1,0 +1,1 @@
+ALTER TABLE "urges" ADD COLUMN "urge_type" varchar(255);

@@ -1,0 +1,13 @@
+import { Module } from '@nestjs/common';
+import { UrgesService } from './urges.service';
+import { UrgesController } from './urges.controller';
+import { DbModule } from '../db/db.module';
+import { AuthModule } from 'src/auth/auth.module';
+
+@Module({
+  imports: [DbModule, AuthModule],
+  controllers: [UrgesController],
+  providers: [UrgesService],
+  exports: [UrgesService],
+})
+export class UrgesModule {}

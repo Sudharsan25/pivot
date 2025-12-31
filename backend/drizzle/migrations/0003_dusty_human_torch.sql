@@ -1,0 +1,1 @@
+ALTER TABLE "urges" ALTER COLUMN "urge_type" SET NOT NULL;

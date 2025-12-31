@@ -1,0 +1,6 @@
+{
+  "databaseURL": "https://Sudharsan-s-workspace-t2ff3c.ap-southeast-2.xata.sh/db/urge-tracker",
+  "codegen": {
+    "output": "src/xata.ts"
+  }
+}
