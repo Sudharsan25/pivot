@@ -2,7 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { eq, and, or, isNull, asc } from 'drizzle-orm';
 import { DbService } from '../db/db.service';
 import { habits, Habit, NewHabit } from '../db/schema';
-import { CreateHabitDto, HabitType } from './dto/create-habit.dto';
+import { HabitType } from './dto/create-habit.dto';
 
 @Injectable()
 export class HabitsService {
@@ -176,4 +176,3 @@ export class HabitsService {
     }
   }
 }
-

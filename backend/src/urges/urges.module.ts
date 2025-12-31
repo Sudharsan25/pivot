@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { UrgesService } from './urges.service';
 import { UrgesController } from './urges.controller';
 import { DbModule } from '../db/db.module';
-import { AuthModule } from 'src/auth/auth.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [DbModule, AuthModule],
