@@ -53,14 +53,14 @@ function AnimatedCounter({
 
 /**
  * Very small inline time-series chart implementation using SVG.
- * Expects data: Array<{ bucket: string, urgeType: string, count: number }>
+ * Expects data: Array<{ bucket: string, habitName: string, count: number }>
  */
 function TimeSeriesChart({
   data,
   height = 220,
   colors = ['#06b6d4', '#7c3aed', '#a3e635', '#fb7185', '#f59e0b', '#60a5fa'],
 }: {
-  data: Array<{ bucket: string; urgeType: string; count: number }>;
+  data: Array<{ bucket: string; habitName: string; count: number }>;
   height?: number;
   colors?: string[];
 }) {
@@ -70,7 +70,7 @@ function TimeSeriesChart({
     const typeSet = new Set<string>();
     for (const r of data) {
       bucketSet.add(r.bucket);
-      typeSet.add(r.urgeType);
+      typeSet.add(r.habitName);
     }
     const buckets = Array.from(bucketSet).sort();
     const types = Array.from(typeSet).sort();
@@ -87,7 +87,7 @@ function TimeSeriesChart({
     for (const r of data) {
       const idx = buckets.indexOf(r.bucket);
       if (idx >= 0)
-        points[idx][r.urgeType] = (points[idx][r.urgeType] as number) + r.count;
+        points[idx][r.habitName] = (points[idx][r.habitName] as number) + r.count;
     }
 
     console.log(
@@ -289,7 +289,7 @@ export default function StatsPage() {
     return today.toISOString().split('T')[0];
   });
   const [timeSeries, setTimeSeries] = useState<
-    Array<{ bucket: string; urgeType: string; count: number }>
+    Array<{ bucket: string; habitName: string; count: number }>
   >([]);
   const [tsLoading, setTsLoading] = useState(false);
 

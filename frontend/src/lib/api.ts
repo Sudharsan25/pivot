@@ -8,6 +8,7 @@ import type {
   CreateUrgeRequest,
   Urge,
   UrgeStats,
+  UrgeStatsByType,
   PaginatedUrges,
   RegisterRequest,
   LoginRequest,
@@ -199,27 +200,11 @@ export const urgesAPI = {
   },
 
   /**
-   * Get urge statistics grouped by urge type for the current user
+   * Get urge statistics grouped by habit for the current user
    */
-  async getStatsByType(): Promise<
-    Array<{
-      urgeType: string;
-      totalResisted: number;
-      totalGaveIn: number;
-      totalDelayed: number;
-      totalUrges: number;
-    }>
-  > {
+  async getStatsByType(): Promise<UrgeStatsByType[]> {
     try {
-      const response = await api.get<
-        Array<{
-          urgeType: string;
-          totalResisted: number;
-          totalGaveIn: number;
-          totalDelayed: number;
-          totalUrges: number;
-        }>
-      >('/urges/stats/by-type');
+      const response = await api.get<UrgeStatsByType[]>('/urges/stats/by-type');
       return response.data;
     } catch (error) {
       throw new Error(getErrorMessage(error));
@@ -227,15 +212,15 @@ export const urgesAPI = {
   },
 
   /**
-   * Get time-series counts per urge type by hour for a specific date
+   * Get time-series counts per habit by hour for a specific date
    */
   async getTimeSeriesByDate(
     date: string // ISO date string (YYYY-MM-DD)
-  ): Promise<Array<{ bucket: string; urgeType: string; count: number }>> {
+  ): Promise<Array<{ bucket: string; habitName: string; count: number }>> {
     try {
       console.log(`[urgesAPI.getTimeSeriesByDate] Fetching for date=${date}`);
       const response = await api.get<
-        Array<{ bucket: string; urgeType: string; count: number }>
+        Array<{ bucket: string; habitName: string; count: number }>
       >('/urges/stats/time-series', {
         params: { date },
       });
