@@ -13,7 +13,7 @@ import { FeedbackForm } from '@/components/FeedbackForm';
 // --- Data Structure ---
 const PAGES_DATA = [
   {
-    title: 'Rejection Sensitive Dysphoria (RSD)',
+    title: 'Rejection Sensitivity',
     subtitle: '',
     intro: (
       <>
@@ -21,22 +21,22 @@ const PAGES_DATA = [
           <strong className="font-semibold text-slate-800 mt-2">
             The "Broken Thermostat" of Emotion
           </strong>
-          : When things go wrong, most people can tell themselves "it's okay,
-          I'll try again tomorrow" and feel better. People with ADHD often can't
-          do this—their brain doesn't have that off switch. Instead, a small
-          setback like a broken habit streak can hit them with overwhelming
-          shame that feels as real and painful as a physical injury.
+          : Many people with ADHD describe moments where emotional reactions
+          feel difficult to regulate after setbacks. While others may be able to
+          say “it’s okay, I’ll try again tomorrow,” some report that even small
+          slips , like breaking a habit, can trigger a surge of shame or
+          emotional pain that feels overwhelming and hard to shake.
         </p>
 
         <p className="text-slate-700 mb-6">
           <strong className="font-semibold text-slate-800">
             The "Internalized Critic"
           </strong>
-          : When people with ADHD make a mistake, they often can't hold two
-          truths at once—like "I'm capable" and "I forgot today." Instead, the
-          mistake becomes their entire identity in that moment. A broken habit
-          streak in an app becomes a painful record of failure, and to escape
-          that overwhelming shame, they delete the app entirely.
+          : In shared experiences, people often describe struggling to hold
+          nuance during mistakes, it becomes hard to think “I’m capable” and “I
+          slipped” at the same time. Instead, the mistake can temporarily feel
+          like a judgment on their entire identity. In habit-tracking apps, this
+          often shows up as abandoning the tool entirely after a single lapse.
         </p>
       </>
     ),
@@ -51,9 +51,9 @@ const PAGES_DATA = [
           'Progress is additive and permanent',
         ],
         whyHelps: [
-          'Removes the moment of rejection that triggers RSD',
+          'Reduces moments that can feel like rejection or failure',
           'A single lapse does not invalidate past effort',
-          'The user never sees a “you failed” state',
+          'Avoids presenting a visible “you failed” state',
         ],
       },
       {
@@ -81,23 +81,21 @@ const PAGES_DATA = [
           <strong className="font-semibold text-slate-800 mt-2">
             The "Now" vs. "Not Now" Horizon
           </strong>
-          : People with ADHD experience time in two zones: "Now" (the immediate
-          present) and "Not Now" (everything else). Because they struggle to
-          connect these zones, they can't easily visualize future rewards—a
-          30-day goal feels abstract and unreal, while the immediate urge to
-          stop feels concrete. Long-term consistency becomes like chasing a
-          mirage that keeps receding.
+          : Many people with ADHD describe experiencing time in two distinct
+          modes: the immediate present (“Now”) and everything else (“Not Now”).
+          Because of this, long-term goals like a 30-day streak can feel
+          abstract or emotionally distant, while an urge in the moment feels
+          concrete and urgent.
         </p>
 
         <p className="text-slate-700 mb-6">
           <strong className="font-semibold text-slate-800">
             The Lack of "Goal Permanence"
           </strong>
-          : People with ADHD struggle with "goal permanence"—when a visible
-          streak breaks and resets, the goal disappears from their mind along
-          with it. They can't easily access the feeling of those 20 successful
-          days, so it doesn't feel like they're 20 steps ahead; it feels like
-          those days belonged to a different person and no longer count.
+          : A commonly reported experience is that progress can feel fragile or
+          invisible once tracking stops. When a streak resets, past effort can
+          be hard to mentally access, it may no longer feel like “20 days of
+          progress,” but like something that doesn’t count anymore.
         </p>
       </>
     ),
@@ -111,9 +109,9 @@ const PAGES_DATA = [
           'No planning, no future framing required',
         ],
         whyHelps: [
-          'Keeps the task inside the user’s “Now” horizon',
-          'Avoids abstract future promises',
-          'Aligns with how ADHD users actually experience time',
+          'Acts as an external reminder of past effort',
+          'Preserves progress even after gaps',
+          'Reduces “it all disappeared” thinking',
         ],
       },
       {
@@ -141,54 +139,52 @@ const PAGES_DATA = [
           <strong className="font-semibold text-slate-800 mt-2">
             The "Dopamine Hunger"
           </strong>
-          : People with ADHD have a lower baseline of dopamine, creating a
-          constant, physically painful sense of boredom. Their brain hunts for
-          high-excitement rewards—novelty, urgency, anything stimulating. A
-          simple habit tracker offering a small "+1" counter feels like low
-          reward for high effort, so the brain ignores it in favor of anything
-          more immediately exciting.
+          : Many people with ADHD describe a persistent sense of restlessness or
+          understimulation. Activities that offer novelty, urgency, or strong
+          emotional feedback can feel far more compelling than slow, repetitive
+          tasks. In contrast, habit trackers that rely on delayed rewards or
+          subtle progress indicators often struggle to hold attention.
         </p>
 
         <p className="text-slate-700 mb-6">
           <strong className="font-semibold text-slate-800">
             The "Wall of Awful"
           </strong>
-          : The "Wall of Awful" is an emotional barrier that builds with each
-          failure, missed deadline, or moment of shame. When someone with ADHD
-          looks at their habit tracker, they're not just seeing tasks—they're
-          seeing this wall of accumulated guilt and fear. The emotional
-          intensity triggers a fight-or-flight response, causing them to freeze
-          or avoid the app entirely.
+          : This term is often used to describe the emotional weight that builds
+          up around tasks after repeated frustration, missed goals, or shame.
+          Over time, even opening a habit tracker can trigger avoidance, not
+          because of laziness, but because the emotional load feels too heavy to
+          approach.
         </p>
       </>
     ),
     features: [
       {
         id: 'dd-1',
-        name: 'One-Tap Action When Urgres Peak',
+        name: 'One-Tap Action During Urges',
         icon: <Zap className="w-5 h-5 text-purple-500" />,
         whatDoes: [
-          'Single, decisive button press',
-          'Minimal friction during emotional peaks',
+          'Single, low-effort action at the peak of an urge',
+          'No planning or multi-step decisions required',
         ],
         whyHelps: [
-          'Reduces “wall of awful” activation cost',
-          'Converts urge energy into action instead of avoidance',
-          'Makes engagement easier than disengagement',
+          'Lowers the emotional cost of engaging',
+          'Turns urge energy into interaction instead of avoidance',
+          'Makes taking action feel easier than doing nothing',
         ],
       },
       {
         id: 'dd-2',
-        name: 'Immediate Feedback Loop', // Renamed duplicate for clarity
+        name: 'Immediate Feedback & Acknowledgment',
         icon: <CheckCircle2 className="w-5 h-5 text-indigo-500" />,
         whatDoes: [
-          'Single, decisive button press',
-          'Minimal friction during emotional peaks',
+          'Instant visual confirmation after logging',
+          'Clear acknowledgment of effort',
         ],
         whyHelps: [
-          'Reduces “wall of awful” activation cost',
-          'Converts urge energy into action instead of avoidance',
-          'Makes engagement easier than disengagement',
+          'Provides immediate reinforcement',
+          'Creates a sense of completion in the moment',
+          'Encourages continued engagement without relying on delayed rewards',
         ],
       },
     ],
@@ -246,9 +242,9 @@ export default function InfoPage() {
               regulation, is intended for general educational and
               self-reflection purposes only. It is not medical advice and should
               not be interpreted as diagnosis or treatment. The content is based
-              on insights aggregated from publicly available research, and
-              articles, and does not replace guidance from qualified medical or
-              mental health professionals.
+              on insights aggregated from commonly reported experiences,
+              publicly available research, and articles, and does not replace
+              guidance from qualified medical or mental health professionals.
               <br />
               <br />
               If any of these topics resonate deeply or feel distressing,
@@ -259,13 +255,16 @@ export default function InfoPage() {
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-slate-800">
+            <h4 className="text-2xl font-bold text-slate-800">
               Understanding the design choices behind{' '}
               <strong className="text-celadon-600 tracking-wide">PIVOT</strong>
-            </h2>
-          </div>
-          <div className="text-sm font-medium text-slate-400 bg-slate-100 px-3 py-1 rounded-full">
-            {index + 1} / {PAGES_DATA.length}
+              <br />
+              <span className="text-base font-normal text-slate-600 mt-2 block">
+                This app is inspired by commonly reported ADHD experiences like
+                rejection sensitivity, time blindness, and dopamine regulation
+                challenges.
+              </span>
+            </h4>
           </div>
         </div>
 
