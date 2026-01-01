@@ -8,6 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { FeedbackForm } from '@/components/FeedbackForm';
 
 // --- Data Structure ---
 const PAGES_DATA = [
@@ -207,6 +208,7 @@ export default function InfoPage() {
       : 0;
 
   const [index, setIndex] = useState(safeInitialIndex);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   // Sync state from URL
   useEffect(() => {
@@ -368,8 +370,17 @@ export default function InfoPage() {
               Next
             </Button>
           </div>
+          <Button
+            variant="outline"
+            onClick={() => setFeedbackOpen(true)}
+            className="text-slate-700 hover:text-slate-900"
+          >
+            Leave your feedback
+          </Button>
         </div>
       </div>
+
+      <FeedbackForm open={feedbackOpen} onOpenChange={setFeedbackOpen} />
     </div>
   );
 }

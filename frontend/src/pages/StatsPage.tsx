@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import * as Tabs from '@radix-ui/react-tabs';
 import * as Tooltip from '@radix-ui/react-tooltip';
+import { FeedbackForm } from '@/components/FeedbackForm';
 
 interface UrgeTypeStat {
   habitId: string;
@@ -87,7 +88,8 @@ function TimeSeriesChart({
     for (const r of data) {
       const idx = buckets.indexOf(r.bucket);
       if (idx >= 0)
-        points[idx][r.habitName] = (points[idx][r.habitName] as number) + r.count;
+        points[idx][r.habitName] =
+          (points[idx][r.habitName] as number) + r.count;
     }
 
     console.log(
@@ -292,6 +294,7 @@ export default function StatsPage() {
     Array<{ bucket: string; habitName: string; count: number }>
   >([]);
   const [tsLoading, setTsLoading] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   useEffect(() => {
     dispatch(fetchStats());
@@ -486,7 +489,7 @@ export default function StatsPage() {
               </p>
             </div>
           ) : (
-              <div className="space-y-4">
+            <div className="space-y-4">
               <h3 className="text-lg font-semibold text-slate-800">
                 Breakdown by Habit
               </h3>
@@ -531,35 +534,23 @@ export default function StatsPage() {
                           </span>
                         </div>
                       </div>
-
-                      {/* Progress bar */}
-                      <div className="mt-4 pt-3 border-t border-slate-100">
-                        <div className="flex items-center gap-2 text-xs text-slate-600 mb-1">
-                          <span>Success Rate</span>
-                        </div>
-                        <div className="w-full bg-slate-100 rounded-full h-2">
-                          <div
-                            className="bg-celadon-600 h-2 rounded-full transition-all"
-                            style={{
-                              width: `${stat.totalUrges > 0 ? Math.round((stat.totalResisted / stat.totalUrges) * 100) : 0}%`,
-                            }}
-                          />
-                        </div>
-                        <span className="text-xs text-slate-700 font-semibold mt-1 block">
-                          {stat.totalUrges > 0
-                            ? Math.round(
-                                (stat.totalResisted / stat.totalUrges) * 100
-                              )
-                            : 0}
-                          %
-                        </span>
-                      </div>
                     </div>
                   </motion.div>
                 ))}
               </div>
             </div>
           )}
+
+          {/* Feedback Button */}
+          <div className="mt-8 flex justify-center">
+            <Button
+              variant="outline"
+              onClick={() => setFeedbackOpen(true)}
+              className="text-slate-700 hover:text-slate-900"
+            >
+              Leave your feedback
+            </Button>
+          </div>
         </Tabs.Content>
 
         <Tabs.Content value="time-series">
@@ -639,6 +630,8 @@ export default function StatsPage() {
           {lastUpdated ? new Date(lastUpdated).toLocaleString() : 'never'}
         </p> */}
       </div>
+
+      <FeedbackForm open={feedbackOpen} onOpenChange={setFeedbackOpen} />
     </motion.div>
   );
 }

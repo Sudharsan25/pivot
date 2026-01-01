@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import { useAppSelector } from '@/store/hooks';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import LandingPage from '@/pages/LandingPage';
@@ -15,6 +16,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <Analytics />
       <Routes>
         {/* Login and Register routes - no DashboardLayout */}
         <Route

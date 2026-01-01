@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Home,
@@ -10,8 +11,10 @@ import {
   LogIn,
   Lock,
   Info,
+  MessageSquare,
 } from 'lucide-react';
 import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
+import { FeedbackForm } from '@/components/FeedbackForm';
 
 import { cn } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -39,6 +42,7 @@ export default function Sidebar() {
   const location = useLocation();
   const { toast } = useToast();
   const token = useAppSelector((state) => state.auth.token);
+  const [feedbackOpen, setFeedbackOpen] = React.useState(false);
 
   const handleLogout = async () => {
     await dispatch(logout());
@@ -92,6 +96,15 @@ export default function Sidebar() {
       requiresAuth: false,
     },
   ];
+
+  const feedbackItem: BottomItem | null = token
+    ? {
+        label: 'Feedback',
+        icon: MessageSquare,
+        action: () => setFeedbackOpen(true),
+        requiresAuth: true,
+      }
+    : null;
 
   const bottomItem: BottomItem = token
     ? {
@@ -162,7 +175,19 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="mt-auto">
+      <div className="mt-auto space-y-1">
+        {feedbackItem && (
+          <button
+            onClick={feedbackItem.action}
+            className={cn(
+              'flex items-center min-h-[48px] w-full py-3 px-4 gap-3 transition-all duration-150 ease-in-out',
+              'rounded-lg text-muted-teal-700 hover:bg-lime-cream-100'
+            )}
+          >
+            <feedbackItem.icon className="h-5 w-5" />
+            <span className="text-sm font-medium">{feedbackItem.label}</span>
+          </button>
+        )}
         {bottomItem.action ? (
           <button
             onClick={bottomItem.action}
@@ -216,6 +241,8 @@ export default function Sidebar() {
       <aside className="hidden md:fixed md:inset-y-0 md:left-0 md:z-40 md:flex md:w-[280px] md:flex-col md:shadow-md md:bg-white">
         <div className="h-full overflow-y-auto">{SidebarContent}</div>
       </aside>
+
+      <FeedbackForm open={feedbackOpen} onOpenChange={setFeedbackOpen} />
     </>
   );
 }
