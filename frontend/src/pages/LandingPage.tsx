@@ -334,7 +334,7 @@ export default function LandingPage() {
           <h2 className="text-4xl font-bold mb-4">
             Ready to Start Your Journey?
           </h2>
-          <p className="text-xl mb-8 text-white/90">
+          <p className="text-xl mb-8 text-celadon-500">
             Join others who are breaking habits the ADHD-friendly way
           </p>
           <motion.button
