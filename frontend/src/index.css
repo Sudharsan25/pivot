@@ -303,6 +303,15 @@
     background-color: var(--celadon-200);
     color: var(--text-primary);
   }
+
+  /* Hide scrollbar utility */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* ===== Page Transition Animations ===== */

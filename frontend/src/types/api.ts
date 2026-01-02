@@ -78,3 +78,14 @@ export interface ApiError {
   timestamp: string;
   path?: string;
 }
+
+export interface SubstituteActivity {
+  id: string;
+  name: string;
+  description: string;
+  duration: number; // in minutes (3-5)
+  category: 'physical' | 'breathing' | 'mental' | 'creative' | 'sensory';
+  icon: string; // lucide-react icon name
+  integration_type?: 'spotify' | 'game' | 'video'; // Future expansion hook
+  integration_data?: any; // Future expansion hook
+}
