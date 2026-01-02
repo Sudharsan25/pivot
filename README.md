@@ -9,8 +9,16 @@ behavior change.
 
 - **Quick Log Buttons**: One-tap logging of urges with immediate outcome
   selection (Resisted, Gave In, Delayed)
-- **Panic Button**: Timer-based intervention tool that automatically sets
-  outcome to "Delayed" if timer runs for more than 10 seconds
+- **Panic Button**: Comprehensive intervention tool with two resistance methods:
+  - **Timer Mode**: Simple 3-minute countdown timer to delay urges
+  - **Substitute Activities**: Choose from 18+ curated activities across 5 categories:
+    - Physical activities (push-ups, wall sits, jumping jacks, dance breaks, walks)
+    - Breathing exercises (box breathing, 4-7-8 breathing, deep belly breaths)
+    - Mental activities (counting backwards, grounding exercises, alphabet games)
+    - Creative activities (doodling, stream-of-consciousness writing, describing surroundings)
+    - Sensory activities (ice cube therapy, pleasant scents, water sounds, texture exploration)
+  - Activities include duration timers, visual progress indicators, and automatic logging
+  - Celebratory completion animations with confetti
 - **Manual Urge Form**: Detailed logging with trigger and notes fields
 - **Habit Management**:
   - Standard habits (shared across all users)
