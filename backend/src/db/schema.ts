@@ -24,7 +24,11 @@ export const users = pgTable(
   {
     id: uuid('id').primaryKey().defaultRandom(),
     email: varchar('email', { length: 255 }).notNull().unique(),
-    passwordHash: varchar('password_hash', { length: 255 }).notNull(),
+    passwordHash: varchar('password_hash', { length: 255 }),
+    googleId: varchar('google_id', { length: 255 }).unique(),
+    name: varchar('name', { length: 255 }),
+    profilePicture: text('profile_picture'),
+    authProvider: varchar('auth_provider', { length: 50 }).notNull().default('local'),
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -32,7 +36,10 @@ export const users = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => [index('users_email_idx').on(table.email)],
+  (table) => [
+    index('users_email_idx').on(table.email),
+    index('users_google_id_idx').on(table.googleId),
+  ],
 );
 
 // Habits table

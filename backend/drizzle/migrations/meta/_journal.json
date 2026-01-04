@@ -43,6 +43,13 @@
       "when": 1767188234154,
       "tag": "0005_late_khan",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1767531522075,
+      "tag": "0006_tricky_wilson_fisk",
+      "breakpoints": true
     }
   ]
 }

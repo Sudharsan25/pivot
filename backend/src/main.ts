@@ -12,9 +12,11 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
 
   // CORS configuration
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
   app.enableCors({
-    origin: ['http://localhost:5173', 'https://pivot-jade.vercel.app'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: frontendUrl,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   });
 

@@ -10,6 +10,7 @@ import { eq } from 'drizzle-orm';
 import { DbService } from '../db/db.service';
 import { users, User } from '../db/schema';
 import { JwtPayload } from './jwt.strategy';
+import { GoogleUserDto } from './dto/google-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -46,8 +47,7 @@ export class AuthService {
         })
         .returning();
 
-      const payload: JwtPayload = { userId: newUser.id };
-      const accessToken = this.jwtService.sign(payload);
+      const accessToken = this.generateJwtToken(newUser);
 
       this.logger.log(`User registered: ${email} (${newUser.id})`);
       this.logger.debug(`Generated token for user ${newUser.id}`);
@@ -78,6 +78,11 @@ export class AuthService {
         throw new UnauthorizedException('Invalid credentials');
       }
 
+      if (!user.passwordHash) {
+        this.logger.warn(`Login attempt for user without password: ${email}`);
+        throw new UnauthorizedException('Invalid credentials. Please sign in with Google.');
+      }
+
       const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
       if (!isPasswordValid) {
@@ -85,11 +90,10 @@ export class AuthService {
         throw new UnauthorizedException('Invalid credentials');
       }
 
-      const payload: JwtPayload = { userId: user.id };
-      const accessToken = this.jwtService.sign(payload);
+      const accessToken = this.generateJwtToken(user);
 
       this.logger.log(`User logged in: ${email} (${user.id})`);
-      this.logger.debug(`Token payload: ${JSON.stringify(payload)}`);
+      this.logger.debug(`Token generated for user ${user.id}`);
 
       return { accessToken };
     } catch (error) {
@@ -98,6 +102,80 @@ export class AuthService {
       }
       this.logger.error('Login failed', error);
       throw new UnauthorizedException('Invalid credentials');
+    }
+  }
+
+  generateJwtToken(user: User): string {
+    const payload: JwtPayload = { userId: user.id };
+    return this.jwtService.sign(payload);
+  }
+
+  async validateGoogleUser(googleUser: GoogleUserDto): Promise<User> {
+    try {
+      // First, check if user exists by googleId
+      const [userByGoogleId] = await this.dbService.db
+        .select()
+        .from(users)
+        .where(eq(users.googleId, googleUser.googleId))
+        .limit(1);
+
+      if (userByGoogleId) {
+        // User exists with this Google ID - return existing user
+        this.logger.log(
+          `Google OAuth login for existing user: ${userByGoogleId.email} (${userByGoogleId.id})`,
+        );
+        return userByGoogleId;
+      }
+
+      // Check if user exists by email
+      const [userByEmail] = await this.dbService.db
+        .select()
+        .from(users)
+        .where(eq(users.email, googleUser.email))
+        .limit(1);
+
+      if (userByEmail) {
+        // User exists with this email - link Google account
+        const [updatedUser] = await this.dbService.db
+          .update(users)
+          .set({
+            googleId: googleUser.googleId,
+            name: googleUser.name,
+            profilePicture: googleUser.profilePicture,
+            authProvider: 'google',
+            updatedAt: new Date(),
+          })
+          .where(eq(users.id, userByEmail.id))
+          .returning();
+
+        this.logger.log(
+          `Linked Google account to existing user: ${googleUser.email} (${userByEmail.id})`,
+        );
+
+        return updatedUser;
+      }
+
+      // User doesn't exist - create new user with Google data
+      const [newUser] = await this.dbService.db
+        .insert(users)
+        .values({
+          email: googleUser.email,
+          googleId: googleUser.googleId,
+          name: googleUser.name,
+          profilePicture: googleUser.profilePicture,
+          authProvider: 'google',
+          passwordHash: null,
+        })
+        .returning();
+
+      this.logger.log(
+        `Created new user with Google OAuth: ${googleUser.email} (${newUser.id})`,
+      );
+
+      return newUser;
+    } catch (error) {
+      this.logger.error('Google user validation failed', error);
+      throw new UnauthorizedException('Failed to authenticate with Google');
     }
   }
 

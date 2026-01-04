@@ -5,6 +5,7 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import LandingPage from '@/pages/LandingPage';
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
+import AuthCallbackPage from '@/pages/AuthCallbackPage';
 import TrackPage from '@/pages/TrackPage';
 import StatsPage from '@/pages/StatsPage';
 import InfoPage from '@/pages/InfoPage';
@@ -35,6 +36,7 @@ function App() {
             )
           }
         />
+        <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
         {/* All other routes with DashboardLayout */}
         <Route path="/" element={<DashboardLayout />}>

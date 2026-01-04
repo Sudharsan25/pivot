@@ -65,10 +65,10 @@ const authSlice = createSlice({
   reducers: {
     setCredentials: (
       state,
-      action: PayloadAction<{ user: User; token: string }>
+      action: PayloadAction<{ token: string }>
     ) => {
-      state.user = action.payload.user;
       state.token = action.payload.token;
+      state.loading = false;
       state.error = null;
       localStorage.setItem('token', action.payload.token);
     },
