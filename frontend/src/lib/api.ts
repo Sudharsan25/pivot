@@ -20,7 +20,7 @@ import type {
 // Get API URL from environment variable with fallback
 // Vite requires VITE_ prefix for client-side env vars
 // Use import.meta.env (Vite's way) instead of process.env
-const getApiUrl = (): string => {
+export const getApiUrl = (): string => {
   const envUrl =
     import.meta.env.VITE_API_URL || import.meta.env.VITE_PUBLIC_API_URL;
   // Check if env var exists and is not empty

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff } from 'lucide-react';
+import { getApiUrl } from '@/lib/api';
 
 // Google Logo SVG Component
 const GoogleIcon = () => (
@@ -36,11 +37,6 @@ const GoogleIcon = () => (
     />
   </svg>
 );
-
-// Get API URL from environment or use default
-const getApiUrl = (): string => {
-  return import.meta.env.VITE_API_URL || 'http://localhost:3000';
-};
 
 // Zod validation schema with password confirmation
 const registerSchema = z
