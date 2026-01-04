@@ -12,7 +12,12 @@ import { Eye, EyeOff } from 'lucide-react';
 
 // Google Logo SVG Component
 const GoogleIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg
+    className="w-5 h-5"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
     <path
       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
       fill="#4285F4"
@@ -54,7 +59,11 @@ type LoginFormData = z.infer<typeof loginSchema>;
 function LoginPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { loading, error: reduxError, token } = useAppSelector((state) => state.auth);
+  const {
+    loading,
+    error: reduxError,
+    token,
+  } = useAppSelector((state) => state.auth);
   const [showPassword, setShowPassword] = useState(false);
   const [searchParams] = useSearchParams();
   const urlError = searchParams.get('error');
@@ -96,9 +105,10 @@ function LoginPage() {
   };
 
   // Determine error message (URL error takes precedence)
-  const errorMessage = urlError === 'google_auth_failed'
-    ? 'Authentication failed. Please try again.'
-    : reduxError;
+  const errorMessage =
+    urlError === 'google_auth_failed'
+      ? 'Authentication failed. Please try again.'
+      : reduxError;
 
   return (
     <div className="min-h-screen w-full flex bg-white">
@@ -143,28 +153,6 @@ function LoginPage() {
             {' '}
             Welcome back!
           </p>
-
-          {/* Google Sign-In Button */}
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full min-h-12 flex items-center justify-center gap-3 rounded-lg border border-input bg-background hover:bg-accent hover:text-accent-foreground"
-            onClick={handleGoogleSignIn}
-            disabled={loading}
-          >
-            <GoogleIcon />
-            <span>Continue with Google</span>
-          </Button>
-
-          {/* Separator */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-muted-teal-200" />
-            </div>
-            <div className="relative flex justify-center">
-              <span className="bg-white px-4 text-sm text-muted-teal-600">or</span>
-            </div>
-          </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 ">
             <div className="space-y-4">
@@ -230,33 +218,28 @@ function LoginPage() {
             </Button>
           </form>
 
-          {/* <div className="relative">
+          {/* Separator */}
+          <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-slate-200" />
+              <span className="w-full border-t border-muted-teal-200" />
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-slate-500">
-                Or continue with
+            <div className="relative flex justify-center">
+              <span className="bg-white px-4 text-sm text-muted-teal-600">
+                or
               </span>
             </div>
           </div>
-
-          <div className="flex flex-col gap-3">
-            <Button
-              variant="outline"
-              className="h-12 w-full justify-center gap-2 font-medium"
-            >
-              <Chrome className="w-5 h-5" />
-              Continue with Google
-            </Button>
-            <Button
-              variant="outline"
-              className="h-12 w-full justify-center gap-2 font-medium"
-            >
-              <Twitter className="w-5 h-5" />
-              Continue with Twitter
-            </Button>
-          </div> */}
+          {/* Google Sign-In Button */}
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full min-h-12 flex items-center justify-center gap-3 rounded-lg border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+          >
+            <GoogleIcon />
+            <span>Continue with Google</span>
+          </Button>
 
           <p className="text-center text-sm text-slate-900">
             Don't have an account?{' '}
