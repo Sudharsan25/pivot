@@ -15,6 +15,8 @@ import type {
   ApiError,
   Habit,
   CreateHabitRequest,
+  User,
+  UpdateUserRequest,
 } from '@/types/api';
 
 // Get API URL from environment variable with fallback
@@ -280,6 +282,33 @@ export const habitsAPI = {
   async createHabit(payload: CreateHabitRequest): Promise<Habit> {
     try {
       const response = await api.post<Habit>('/habits', payload);
+      return response.data;
+    } catch (error) {
+      throw new Error(getErrorMessage(error));
+    }
+  },
+};
+
+// Users API functions
+export const usersAPI = {
+  /**
+   * Get current user's profile
+   */
+  async getCurrentUser(): Promise<User> {
+    try {
+      const response = await api.get<User>('/users/me');
+      return response.data;
+    } catch (error) {
+      throw new Error(getErrorMessage(error));
+    }
+  },
+
+  /**
+   * Update current user's profile
+   */
+  async updateProfile(data: UpdateUserRequest): Promise<User> {
+    try {
+      const response = await api.patch<User>('/users/me', data);
       return response.data;
     } catch (error) {
       throw new Error(getErrorMessage(error));

@@ -1,6 +1,15 @@
 export interface User {
   id: string;
   email: string;
+  name: string | null;
+  profilePicture: string | null;
+  authProvider: 'local' | 'google';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpdateUserRequest {
+  name?: string;
 }
 
 export interface Habit {
@@ -39,6 +48,7 @@ export interface UrgeStatsByType {
 
 export interface AuthResponse {
   accessToken: string;
+  user: User;
 }
 
 export interface PaginatedUrges {

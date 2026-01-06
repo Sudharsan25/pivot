@@ -1,6 +1,8 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
-import { useAppSelector } from '@/store/hooks';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import { fetchCurrentUser } from '@/store/authSlice';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import LandingPage from '@/pages/LandingPage';
 import LoginPage from '@/pages/LoginPage';
@@ -9,11 +11,21 @@ import AuthCallbackPage from '@/pages/AuthCallbackPage';
 import TrackPage from '@/pages/TrackPage';
 import StatsPage from '@/pages/StatsPage';
 import InfoPage from '@/pages/InfoPage';
+import ProfilePage from '@/pages/ProfilePage';
 import DashboardLayout from '@/layouts/DashboardLayout';
 
 function App() {
+  const dispatch = useAppDispatch();
   const stateToken = useAppSelector((state) => state.auth.token);
+  const user = useAppSelector((state) => state.auth.user);
   const token = stateToken ?? localStorage.getItem('token');
+
+  // Fetch user data on app load if token exists but user is not loaded
+  useEffect(() => {
+    if (token && !user) {
+      dispatch(fetchCurrentUser());
+    }
+  }, [token, user, dispatch]);
 
   return (
     <BrowserRouter>
@@ -58,6 +70,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <StatsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="dashboard/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
               </ProtectedRoute>
             }
           />

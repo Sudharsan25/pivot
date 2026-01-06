@@ -12,6 +12,15 @@ import { users, User } from '../db/schema';
 import { JwtPayload } from './jwt.strategy';
 import { GoogleUserDto } from './dto/google-user.dto';
 
+// Safe user type without sensitive data
+export type SafeUser = Omit<User, 'passwordHash' | 'googleId'>;
+
+// Auth response with user data
+export interface AuthResponseWithUser {
+  accessToken: string;
+  user: SafeUser;
+}
+
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
@@ -21,10 +30,19 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  /**
+   * Remove sensitive data from user object
+   */
+  private toSafeUser(user: User): SafeUser {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { passwordHash, googleId, ...safeUser } = user;
+    return safeUser;
+  }
+
   async register(
     email: string,
     password: string,
-  ): Promise<{ accessToken: string }> {
+  ): Promise<AuthResponseWithUser> {
     try {
       const existingUser = await this.dbService.db
         .select()
@@ -52,7 +70,7 @@ export class AuthService {
       this.logger.log(`User registered: ${email} (${newUser.id})`);
       this.logger.debug(`Generated token for user ${newUser.id}`);
 
-      return { accessToken };
+      return { accessToken, user: this.toSafeUser(newUser) };
     } catch (error) {
       if (error instanceof ConflictException) {
         throw error;
@@ -62,10 +80,7 @@ export class AuthService {
     }
   }
 
-  async login(
-    email: string,
-    password: string,
-  ): Promise<{ accessToken: string }> {
+  async login(email: string, password: string): Promise<AuthResponseWithUser> {
     try {
       const [user] = await this.dbService.db
         .select()
@@ -80,7 +95,9 @@ export class AuthService {
 
       if (!user.passwordHash) {
         this.logger.warn(`Login attempt for user without password: ${email}`);
-        throw new UnauthorizedException('Invalid credentials. Please sign in with Google.');
+        throw new UnauthorizedException(
+          'Invalid credentials. Please sign in with Google.',
+        );
       }
 
       const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
@@ -95,7 +112,7 @@ export class AuthService {
       this.logger.log(`User logged in: ${email} (${user.id})`);
       this.logger.debug(`Token generated for user ${user.id}`);
 
-      return { accessToken };
+      return { accessToken, user: this.toSafeUser(user) };
     } catch (error) {
       if (error instanceof UnauthorizedException) {
         throw error;

@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DbModule } from './db/db.module';
 import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 import { UrgesModule } from './urges/urges.module';
 import { HabitsModule } from './habits/habits.module';
 import { ConfigModule } from '@nestjs/config';
@@ -23,6 +24,7 @@ import { ConfigModule } from '@nestjs/config';
     ]),
     DbModule,
     AuthModule,
+    UsersModule,
     HabitsModule,
     UrgesModule,
   ],
