@@ -12,8 +12,10 @@ import {
   MessageSquare,
   LogIn,
   Lock,
+  User,
 } from 'lucide-react';
 import { FeedbackForm } from '@/components/FeedbackForm';
+import { AvatarDropdown } from '@/components/AvatarDropdown';
 import { cn } from '@/lib/utils';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { logout } from '@/store/authSlice';
@@ -180,6 +182,7 @@ export default function Navbar() {
         transition={{ duration: 0.4, ease: 'easeOut' }}
         className={cn(
           'fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out',
+          mobileMenuOpen && 'hidden md:block',
           scrolled
             ? 'w-[95%] mx-auto mt-4 rounded-full px-6 py-3'
             : 'w-full px-8 py-4',
@@ -238,65 +241,9 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Right: Actions - Desktop */}
-          <div className="hidden md:flex items-center gap-2 md:gap-2 lg:gap-3">
-            {token && (
-              <button
-                onClick={() => setFeedbackOpen(true)}
-                className={cn(
-                  'flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200',
-                  'text-muted-teal-700 hover:text-celadon-500 hover:bg-lime-cream-100/50',
-                  'focus:outline-none focus:ring-2 focus:ring-celadon-500 focus:ring-offset-2',
-                  'min-h-[44px]'
-                )}
-                aria-label="Feedback"
-              >
-                {scrolled ? (
-                  <MessageSquare className="h-6 w-6" />
-                ) : (
-                  <>
-                    <MessageSquare className="h-5 w-5" />
-                    <span className="text-sm font-medium">Feedback</span>
-                  </>
-                )}
-              </button>
-            )}
-            <button
-              onClick={
-                token
-                  ? handleLogout
-                  : () => handleNavigation('/login', false, 'Login')
-              }
-              className={cn(
-                'flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200',
-                'text-muted-teal-700 hover:text-celadon-500 hover:bg-lime-cream-100/50',
-                'focus:outline-none focus:ring-2 focus:ring-celadon-500 focus:ring-offset-2',
-                'min-h-[44px]'
-              )}
-              aria-label={token ? 'Logout' : 'Login'}
-            >
-              {scrolled ? (
-                token ? (
-                  <LogOut className="h-6 w-6" />
-                ) : (
-                  <LogIn className="h-6 w-6" />
-                )
-              ) : (
-                <>
-                  {token ? (
-                    <>
-                      <LogOut className="h-5 w-5" />
-                      <span className="text-sm font-medium">Logout</span>
-                    </>
-                  ) : (
-                    <>
-                      <LogIn className="h-5 w-5" />
-                      <span className="text-sm font-medium">Login</span>
-                    </>
-                  )}
-                </>
-              )}
-            </button>
+          {/* Right: Avatar Dropdown - Desktop */}
+          <div className="hidden md:flex items-center">
+            <AvatarDropdown onFeedbackClick={() => setFeedbackOpen(true)} />
           </div>
         </div>
       </motion.nav>
@@ -341,16 +288,28 @@ export default function Navbar() {
                 {/* Bottom Actions */}
                 <div className="mt-auto space-y-1 pt-4 border-t border-lime-cream-200">
                   {token && (
-                    <button
-                      onClick={() => {
-                        setFeedbackOpen(true);
-                        setMobileMenuOpen(false);
-                      }}
-                      className="flex items-center min-h-[48px] w-full py-3 px-4 gap-3 transition-all duration-150 ease-in-out rounded-lg text-muted-teal-700 hover:bg-lime-cream-100"
-                    >
-                      <MessageSquare className="h-5 w-5" />
-                      <span className="text-sm font-medium">Feedback</span>
-                    </button>
+                    <>
+                      <button
+                        onClick={() => {
+                          navigate('/dashboard/profile');
+                          setMobileMenuOpen(false);
+                        }}
+                        className="flex items-center min-h-[48px] w-full py-3 px-4 gap-3 transition-all duration-150 ease-in-out rounded-lg text-muted-teal-700 hover:bg-lime-cream-100"
+                      >
+                        <User className="h-5 w-5" />
+                        <span className="text-sm font-medium">Profile</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setFeedbackOpen(true);
+                          setMobileMenuOpen(false);
+                        }}
+                        className="flex items-center min-h-[48px] w-full py-3 px-4 gap-3 transition-all duration-150 ease-in-out rounded-lg text-muted-teal-700 hover:bg-lime-cream-100"
+                      >
+                        <MessageSquare className="h-5 w-5" />
+                        <span className="text-sm font-medium">Feedback</span>
+                      </button>
+                    </>
                   )}
                   <button
                     onClick={
